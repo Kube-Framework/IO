@@ -10,7 +10,7 @@
 namespace kF::IO
 {
     /** @brief Allocator of the IO library */
-    using IOAllocator = Core::Utils::DefaultStaticAllocator;
+    using IOAllocator = Core::DefaultStaticAllocator;
 
 
     /** @brief Prefix name of any resource */
@@ -21,5 +21,5 @@ namespace kF::IO
 
 
     /** @brief View of a resource */
-    using ResourceView = Core::Utils::IteratorRange<const std::uint8_t *>;
+    using ResourceView = Core::IteratorRange<const std::uint8_t *>;
 }
