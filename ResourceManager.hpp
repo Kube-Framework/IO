@@ -39,7 +39,7 @@ class alignas_half_cacheline kF::IO::ResourceManager
 {
 public:
     /** @brief Add environment to  */
-    [[nodiscard]] static void RegisterEnvironmentLater(
+    static void RegisterEnvironmentLater(
             const Core::HashedName environmentName, const Environment environment) noexcept;
 
     /** @brief Get manager global instance */

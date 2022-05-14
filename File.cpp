@@ -32,7 +32,7 @@ IO::File::File(const std::string_view &path) noexcept
     : _path(path)
 {
     if (path.starts_with(ResourcePrefix)) {
-        const auto to = path.find('/', EnvironmentBeginIndex);
+        const auto to = static_cast<std::uint32_t>(path.find('/', EnvironmentBeginIndex));
         _environmentTo = to;
         _environmentHash = Core::Hash(path.substr(EnvironmentBeginIndex, to - EnvironmentBeginIndex));
     }
@@ -69,14 +69,13 @@ std::size_t IO::File::read(std::uint8_t * const from, std::uint8_t * const to, c
         if (offset < size) [[likely]]
             return std::min(size - offset, desired);
         else [[unlikely]]
-            return 0ull;
+            return 0ul;
     };
 
     const auto count = static_cast<std::size_t>(std::distance(from, to));
 
     if (isResource()) {
         const auto range = queryResource();
-        const auto rangeSize = range.size();
         const auto readCount = GetReadSize(offset, count, range.size());
         if (readCount) [[likely]] {
             const auto begin = range.begin() + offset;

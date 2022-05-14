@@ -3,8 +3,6 @@
  * @ Description: IO ResourceManager
  */
 
-#pragma once
-
 #include <Kube/Core/TrivialDispatcher.hpp>
 #include <Kube/Core/Abort.hpp>
 

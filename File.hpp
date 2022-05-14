@@ -50,10 +50,10 @@ public:
     [[nodiscard]] inline bool isResource(void) const noexcept { return _environmentHash; }
 
     /** @brief Get environment name */
-    [[nodiscards]] inline Core::HashedName environmentHash(void) const noexcept { return _environmentHash; }
+    [[nodiscard]] inline Core::HashedName environmentHash(void) const noexcept { return _environmentHash; }
 
     /** @brief Get environment name */
-    [[nodiscards]] inline std::string_view environment(void) const noexcept
+    [[nodiscard]] inline std::string_view environment(void) const noexcept
         { return _path.substr(EnvironmentBeginIndex, _environmentTo - EnvironmentBeginIndex); }
 
 
@@ -61,7 +61,7 @@ public:
     [[nodiscard]] bool resourceExists(void) const noexcept;
 
     /** @brief Get resource path */
-    [[nodiscards]] inline std::string_view resourcePath(void) const noexcept
+    [[nodiscard]] inline std::string_view resourcePath(void) const noexcept
         { return _path.substr(_environmentTo + 1); }
 
     /** @brief Query a resource */
