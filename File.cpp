@@ -69,7 +69,7 @@ std::size_t IO::File::read(std::uint8_t * const from, std::uint8_t * const to, c
         if (offset < size) [[likely]]
             return std::min(size - offset, desired);
         else [[unlikely]]
-            return 0ul;
+            return static_cast<std::size_t>(0ul);
     };
 
     const auto count = static_cast<std::size_t>(std::distance(from, to));
