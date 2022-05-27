@@ -75,7 +75,7 @@ private:
     /** @brief Global instance */
     static ResourceManager *_Instance;
 
-    Core::TinyVector<Core::HashedName, IOAllocator> _environmentNames {};
-    Core::TinyVector<cmrc::embedded_filesystem, IOAllocator> _environments {};
+    Core::Vector<Core::HashedName, IOAllocator> _environmentNames {};
+    Core::Vector<cmrc::embedded_filesystem, IOAllocator> _environments {};
 };
 static_assert_fit_half_cacheline(kF::IO::ResourceManager);
