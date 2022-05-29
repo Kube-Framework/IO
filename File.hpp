@@ -68,6 +68,9 @@ public:
     [[nodiscard]] ResourceView queryResource(void) const noexcept;
 
 
+    /** @brief Check if the file exists */
+    [[nodiscard]] bool exists(void) const noexcept;
+
     /** @brief Get the file size */
     [[nodiscard]] std::size_t fileSize(void) const noexcept;
 

@@ -54,6 +54,14 @@ IO::ResourceView IO::File::queryResource(void) const noexcept
     );
 }
 
+bool IO::File::exists(void) const noexcept
+{
+    if (isResource())
+        return resourceExists();
+    else
+        return std::filesystem::exists(_path);
+}
+
 std::size_t IO::File::fileSize(void) const noexcept
 {
     if (isResource()) {

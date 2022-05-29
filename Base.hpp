@@ -1,6 +1,6 @@
 /**
  * @ Author: Matthieu Moinvaziri
- * @ Description: IO ResourceManager
+ * @ Description: IO Base
  */
 
 #pragma once
