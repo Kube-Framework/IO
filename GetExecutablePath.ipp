@@ -3,7 +3,11 @@
  * @ Description: IO GetExecutablePath
  */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <whereami.h>
+#pragma GCC diagnostic pop
+
 #include <Kube/Core/Abort.hpp>
 
 #include "GetExecutablePath.hpp"
