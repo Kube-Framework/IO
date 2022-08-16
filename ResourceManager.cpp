@@ -12,7 +12,9 @@ using namespace kF;
 
 IO::ResourceManager *IO::ResourceManager::_Instance {};
 
-static Core::TrivialDispatcher<void(void), Core::DefaultStaticAllocator, Core::CacheLineQuarterSize> RegisterDispatcher {};
+static Core::TrivialDispatcher<
+    void(void), Core::DefaultStaticAllocator, Core::CacheLineEighthSize * 4
+> RegisterDispatcher {};
 
 void IO::ResourceManager::RegisterEnvironmentLater(
         const Core::HashedName environmentName, const Environment environment) noexcept
