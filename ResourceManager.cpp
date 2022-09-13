@@ -57,7 +57,7 @@ IO::Environment IO::ResourceManager::getEnvironment(const Core::HashedName envir
     const auto it = _environmentNames.find(environmentName);
     kFEnsure(it != _environmentNames.end(),
         "IO::ResourceManager::getEnvironment: Environment is not registered");
-    const auto index = Core::Distance<std::uint32_t>(_environmentNames.begin(), it));
+    const auto index = Core::Distance<std::uint32_t>(_environmentNames.begin(), it);
     return _environments.at(index);
 }
 
