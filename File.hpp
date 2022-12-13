@@ -75,6 +75,17 @@ public:
     [[nodiscard]] std::size_t fileSize(void) const noexcept;
 
 
+    /** @brief Get current offset */
+    [[nodiscard]] std::size_t offset(void) const noexcept { return _offset; }
+
+    /** @brief Set read offset */
+    void setReadOffset(const std::size_t offset) noexcept;
+
+
+    /** @brief Read data and store it into range (use internal offset) */
+    [[nodiscard]] inline std::size_t read(std::uint8_t * const from, std::uint8_t * const to) noexcept
+        { return read(from, to, _offset); }
+
     /** @brief Read data and store it into range
      *  @param offset Offset in byte from where to start reading the file */
     [[nodiscard]] std::size_t read(std::uint8_t * const from, std::uint8_t * const to, const std::size_t offset) noexcept;
@@ -89,4 +100,5 @@ private:
     Core::HashedName _environmentHash {};
     std::uint32_t _environmentTo {};
     StreamHandle *_stream {};
+    std::size_t _offset {};
 };

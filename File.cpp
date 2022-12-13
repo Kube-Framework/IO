@@ -71,6 +71,15 @@ std::size_t IO::File::fileSize(void) const noexcept
     }
 }
 
+void IO::File::setReadOffset(const std::size_t offset) noexcept
+{
+    if (_offset != offset) {
+        _offset = offset;
+        if (!isResource())
+            _stream->ifs.seekg(offset);
+    }
+}
+
 std::size_t IO::File::read(std::uint8_t * const from, std::uint8_t * const to, const std::size_t offset) noexcept
 {
     constexpr auto GetReadSize = [](const std::size_t offset, const std::size_t desired, const std::size_t size) {
@@ -88,16 +97,18 @@ std::size_t IO::File::read(std::uint8_t * const from, std::uint8_t * const to, c
         if (readCount) [[likely]] {
             const auto begin = range.begin() + offset;
             std::copy(begin, begin + readCount, from);
+            _offset += readCount;
         }
         return readCount;
     } else {
         ensureStream();
-        const auto readCount = GetReadSize(offset, count, _stream->fileSize);
+        auto readCount = GetReadSize(offset, count, _stream->fileSize);
         if (readCount) [[likely]] {
-            _stream->ifs.seekg(offset);
-            if (_stream->ifs.good())
+            setReadOffset(offset);
+            if (_stream->ifs.good()) {
                 _stream->ifs.read(reinterpret_cast<char *>(from), readCount);
-            else
+                _offset += readCount;
+            } else
                 return 0u;
         }
         return readCount;
