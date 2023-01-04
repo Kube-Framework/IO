@@ -1,6 +1,6 @@
 /**
  * @ Author: Matthieu Moinvaziri
- * @ Description: Unit tests of File
+ * @ Description: Unit tests of StandardPaths
  */
 
 #include <filesystem>
@@ -8,12 +8,12 @@
 #include <gtest/gtest.h>
 
 #include <Kube/Core/String.hpp>
-#include <Kube/IO/GetExecutablePath.hpp>
+#include <Kube/IO/StandardPaths.hpp>
 
 
 using namespace kF;
 
-TEST(GetExecutablePath, Basics)
+TEST(StandardPaths, GetExecutablePath)
 {
     const auto str = IO::GetExecutablePath<Core::String<>>();
 
@@ -22,7 +22,7 @@ TEST(GetExecutablePath, Basics)
 }
 
 
-TEST(GetExecutableDirectory, Basics)
+TEST(StandardPaths, GetExecutableDirectory)
 {
     const auto str = IO::GetExecutableDirectory<Core::String<>>();
 
