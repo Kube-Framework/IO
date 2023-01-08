@@ -3,10 +3,16 @@
  * @ Description: IO StandardPaths
  */
 
+#include <Kube/Core/Platform.hpp>
+
+#if KUBE_COMPILER_GCC
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
 #include <whereami.h>
+#if KUBE_COMPILER_GCC
 #pragma GCC diagnostic pop
+#endif
 
 #include <platform_folders.h>
 
