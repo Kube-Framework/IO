@@ -91,6 +91,10 @@ public:
     [[nodiscard]] std::size_t read(std::uint8_t * const from, std::uint8_t * const to, const std::size_t offset) noexcept;
 
 
+    /** @brief Copy file to another location */
+    bool copy(const std::string_view &destination) const noexcept;
+
+
 private:
     /** @brief Ensure that this instance has an allocated stream */
     void ensureStream(void) noexcept;

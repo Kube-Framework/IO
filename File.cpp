@@ -115,6 +115,24 @@ std::size_t IO::File::read(std::uint8_t * const from, std::uint8_t * const to, c
     }
 }
 
+bool kF::IO::File::copy(const std::string_view &destination) const noexcept
+{
+    const std::filesystem::path dest(destination);
+    if (!exists())
+        return false;
+    if (isResource()) {
+        File copy(*this);
+        const auto range = queryResource();
+        std::ofstream ofs(dest);
+        if (ofs.fail())
+            return false;
+        ofs.write(reinterpret_cast<const char *>(range.from), range.size());
+        return ofs.good();
+    } else {
+        return std::filesystem::copy_file(_path, dest);
+    }
+}
+
 void kF::IO::File::ensureStream(void) noexcept
 {
     if (!_stream) [[unlikely]] {
