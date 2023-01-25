@@ -123,7 +123,7 @@ bool kF::IO::File::copy(const std::string_view &destination) const noexcept
     if (isResource()) {
         File copy(*this);
         const auto range = queryResource();
-        std::ofstream ofs(dest);
+        std::ofstream ofs(dest, std::ios::binary | std::ios::out);
         if (ofs.fail())
             return false;
         ofs.write(reinterpret_cast<const char *>(range.from), range.size());
