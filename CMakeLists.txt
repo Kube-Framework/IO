@@ -3,6 +3,7 @@ kube_add_library(IO
         Base.hpp
         File.cpp
         File.hpp
+        File.ipp
         ResourceManager.cpp
         ResourceManager.hpp
         StandardPaths.hpp

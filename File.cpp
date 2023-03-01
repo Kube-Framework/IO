@@ -138,7 +138,7 @@ void kF::IO::File::ensureStream(void) noexcept
     if (!_stream) [[unlikely]] {
         const auto alloc = IOAllocator::Allocate(sizeof(StreamHandle), alignof(StreamHandle));
         _stream = new (alloc) StreamHandle {
-            .ifs = std::ifstream(std::string(_path), std::ios::binary | std::ios::ate),
+            .ifs = std::ifstream(std::string(_path), std::ios::binary),
             .fileSize = std::filesystem::file_size(_path)
         };
         kFEnsure(_stream->ifs.good(),

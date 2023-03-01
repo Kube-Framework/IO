@@ -12,6 +12,18 @@
 namespace kF::IO
 {
     class File;
+
+    namespace Internal
+    {
+        template<typename Container>
+        concept ResizableContainer =
+            (sizeof(std::remove_cvref_t<decltype(*std::declval<Container>().data())>) == sizeof(std::byte))
+            && requires(Container &container) {
+                container.data();
+                container.size();
+                container.resize(std::declval<std::size_t>());
+            };
+    }
 }
 
 class kF::IO::File
@@ -90,6 +102,14 @@ public:
      *  @param offset Offset in byte from where to start reading the file */
     [[nodiscard]] std::size_t read(std::uint8_t * const from, std::uint8_t * const to, const std::size_t offset) noexcept;
 
+    /** @brief Read all file data and store it into custom container */
+    template<kF::IO::Internal::ResizableContainer Container>
+    [[nodiscard]] bool readAll(Container &container) noexcept;
+
+    /** @brief Read all file data and store it into custom container */
+    template<kF::IO::Internal::ResizableContainer Container>
+    [[nodiscard]] Container readAll(void) noexcept;
+
 
     /** @brief Copy file to another location */
     bool copy(const std::string_view &destination) const noexcept;
@@ -106,3 +126,5 @@ private:
     StreamHandle *_stream {};
     std::size_t _offset {};
 };
+
+#include "File.ipp"
