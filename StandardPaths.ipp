@@ -5,12 +5,12 @@
 
 #include <Kube/Core/Platform.hpp>
 
-#if KUBE_COMPILER_GCC
+#if KUBE_COMPILER_GCC | KUBE_COMPILER_CLANG
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #endif
 #include <whereami.h>
-#if KUBE_COMPILER_GCC
+#if KUBE_COMPILER_GCC | KUBE_COMPILER_CLANG
 #pragma GCC diagnostic pop
 #endif
 

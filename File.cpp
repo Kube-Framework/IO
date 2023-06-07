@@ -76,7 +76,7 @@ void IO::File::setReadOffset(const std::size_t offset) noexcept
     if (_offset != offset) {
         _offset = offset;
         if (!isResource())
-            _stream->ifs.seekg(offset);
+            _stream->ifs.seekg(static_cast<std::streamoff>(offset));
     }
 }
 
@@ -106,7 +106,7 @@ std::size_t IO::File::read(std::uint8_t * const from, std::uint8_t * const to, c
         if (readCount) [[likely]] {
             setReadOffset(offset);
             if (_stream->ifs.good()) {
-                _stream->ifs.read(reinterpret_cast<char *>(from), readCount);
+                _stream->ifs.read(reinterpret_cast<char *>(from), static_cast<std::streamoff>(readCount));
                 _offset += readCount;
             } else
                 return 0u;
@@ -126,7 +126,7 @@ bool kF::IO::File::copy(const std::string_view &destination) const noexcept
         std::ofstream ofs(dest, std::ios::binary | std::ios::out);
         if (ofs.fail())
             return false;
-        ofs.write(reinterpret_cast<const char *>(range.from), range.size());
+        ofs.write(reinterpret_cast<const char *>(range.from), static_cast<std::streamoff>(range.size()));
         return ofs.good();
     } else {
         return std::filesystem::copy_file(_path, dest);
