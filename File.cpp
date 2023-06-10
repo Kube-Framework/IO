@@ -38,6 +38,16 @@ IO::File::File(const std::string_view &path) noexcept
     }
 }
 
+std::string_view IO::File::filename(void) const noexcept
+{
+    auto index = _path.size();
+    auto lastPointIndex = index;
+    while (--index && (_path[index] != '/') && (_path[index] != '\\'))
+        lastPointIndex = Core::BranchlessIf(_path[index] == '.', index, lastPointIndex);
+    index = bool(index) * (index + 1); // Only increment by 1 if not zero
+    return _path.substr(index, lastPointIndex - index);
+}
+
 bool IO::File::resourceExists(void) const noexcept
 {
     return ResourceManager::Get().resourceExists(
@@ -117,9 +127,9 @@ std::size_t IO::File::read(std::uint8_t * const from, std::uint8_t * const to, c
 
 bool kF::IO::File::copy(const std::string_view &destination) const noexcept
 {
-    const std::filesystem::path dest(destination);
     if (!exists())
         return false;
+    const std::filesystem::path dest(destination);
     if (isResource()) {
         File copy(*this);
         const auto range = queryResource();
@@ -131,6 +141,14 @@ bool kF::IO::File::copy(const std::string_view &destination) const noexcept
     } else {
         return std::filesystem::copy_file(_path, dest);
     }
+}
+
+bool kF::IO::File::remove(void) const noexcept
+{
+    if (isResource() || !exists())
+        return false;
+    else
+        return std::filesystem::remove(_path);
 }
 
 void kF::IO::File::ensureStream(void) noexcept

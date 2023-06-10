@@ -57,6 +57,9 @@ public:
     /** @brief Get file path */
     [[nodiscard]] std::string_view path(void) const noexcept { return _path; }
 
+    /** @brief Get file name */
+    [[nodiscard]] std::string_view filename(void) const noexcept;
+
 
     /** @brief Check if the file is a resource file (embedded into the executable) */
     [[nodiscard]] inline bool isResource(void) const noexcept { return _environmentHash; }
@@ -113,6 +116,9 @@ public:
 
     /** @brief Copy file to another location */
     bool copy(const std::string_view &destination) const noexcept;
+
+    /** @brief remove file */
+    bool remove(void) const noexcept;
 
 
 private:
