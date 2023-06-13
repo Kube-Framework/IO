@@ -23,11 +23,13 @@
 template<typename Type>
 Type kF::IO::GetExecutablePath(void) noexcept
 {
+    using Range = decltype(std::size(std::declval<Type>()));
+
     // Init container
     const auto expectedSize = wai_getExecutablePath(nullptr, 0, nullptr);
     if (expectedSize == -1) [[unlikely]]
         return Type {};
-    Type container(expectedSize);
+    Type container(static_cast<Range>(expectedSize));
 
     // Query path
     const auto finalSize = wai_getExecutablePath(container.data(), static_cast<int>(container.size()), nullptr);
@@ -40,11 +42,13 @@ Type kF::IO::GetExecutablePath(void) noexcept
 template<typename Type>
 Type kF::IO::GetExecutableDirectory(void) noexcept
 {
+    using Range = decltype(std::size(std::declval<Type>()));
+
     // Init container
     const auto expectedSize = wai_getModulePath(nullptr, 0, nullptr);
     if (expectedSize == -1) [[unlikely]]
         return Type {};
-    Type container(expectedSize);
+    Type container(static_cast<Range>(expectedSize));
 
     // Query path
     int dirIndex {};
@@ -52,6 +56,11 @@ Type kF::IO::GetExecutableDirectory(void) noexcept
     kFEnsure(finalSize == expectedSize,
         "IO::GetExecutableDirectory: Couldn't retreive executable path");
 
+#if KUBE_PLATFORM_APPLE
+    // @todo fix this
+    while (!container.empty() && container.back() != '/')
+        container.pop();
+#endif
     return container;
 }
 
