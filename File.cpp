@@ -45,7 +45,7 @@ std::string_view IO::File::filename(void) const noexcept
     while (--index && (_path[index] != '/') && (_path[index] != '\\'))
         lastPointIndex = Core::BranchlessIf(_path[index] == '.', index, lastPointIndex);
     index = bool(index) * (index + 1); // Only increment by 1 if not zero
-    return _path.substr(index, lastPointIndex - index);
+    return _path.toView().substr(index, lastPointIndex - index);
 }
 
 bool IO::File::resourceExists(void) const noexcept
@@ -69,7 +69,7 @@ bool IO::File::exists(void) const noexcept
     if (isResource())
         return resourceExists();
     else
-        return std::filesystem::exists(_path);
+        return std::filesystem::exists(_path.toView());
 }
 
 std::size_t IO::File::fileSize(void) const noexcept
@@ -77,7 +77,7 @@ std::size_t IO::File::fileSize(void) const noexcept
     if (isResource()) {
         return queryResource().size();
     } else {
-        return std::filesystem::file_size(_path);
+        return std::filesystem::file_size(_path.toView());
     }
 }
 
@@ -139,7 +139,7 @@ bool kF::IO::File::copy(const std::string_view &destination) const noexcept
         ofs.write(reinterpret_cast<const char *>(range.from), static_cast<std::streamoff>(range.size()));
         return ofs.good();
     } else {
-        return std::filesystem::copy_file(_path, dest);
+        return std::filesystem::copy_file(_path.toView(), dest);
     }
 }
 
@@ -148,7 +148,7 @@ bool kF::IO::File::remove(void) const noexcept
     if (isResource() || !exists())
         return false;
     else
-        return std::filesystem::remove(_path);
+        return std::filesystem::remove(_path.toView());
 }
 
 void kF::IO::File::ensureStream(void) noexcept
@@ -156,8 +156,8 @@ void kF::IO::File::ensureStream(void) noexcept
     if (!_stream) [[unlikely]] {
         const auto alloc = IOAllocator::Allocate(sizeof(StreamHandle), alignof(StreamHandle));
         _stream = new (alloc) StreamHandle {
-            .ifs = std::ifstream(std::string(_path), std::ios::binary),
-            .fileSize = std::filesystem::file_size(_path)
+            .ifs = std::ifstream { std::filesystem::path(_path.toView()), std::ios::binary },
+            .fileSize = std::filesystem::file_size(_path.toView())
         };
         kFEnsure(_stream->ifs.good(),
             "UI::File::ensureStream: Stream opened with invalid file path '", _path, '\'');

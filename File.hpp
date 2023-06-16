@@ -6,6 +6,7 @@
 #pragma once
 
 #include <Kube/Core/Hash.hpp>
+#include <Kube/Core/SmallString.hpp>
 
 #include "Base.hpp"
 
@@ -69,7 +70,7 @@ public:
 
     /** @brief Get environment name */
     [[nodiscard]] inline std::string_view environment(void) const noexcept
-        { return _path.substr(EnvironmentBeginIndex, _environmentTo - EnvironmentBeginIndex); }
+        { return _path.toView().substr(EnvironmentBeginIndex, _environmentTo - EnvironmentBeginIndex); }
 
 
     /** @brief Check if resource exists */
@@ -77,7 +78,7 @@ public:
 
     /** @brief Get resource path */
     [[nodiscard]] inline std::string_view resourcePath(void) const noexcept
-        { return _path.substr(_environmentTo + 1); }
+        { return _path.toView().substr(_environmentTo + 1); }
 
     /** @brief Query a resource */
     [[nodiscard]] ResourceView queryResource(void) const noexcept;
@@ -126,7 +127,7 @@ private:
     void ensureStream(void) noexcept;
 
 
-    std::string_view _path {};
+    Core::SmallString<IOAllocator> _path {};
     Core::HashedName _environmentHash {};
     std::uint32_t _environmentTo {};
     StreamHandle *_stream {};
