@@ -25,6 +25,8 @@ IO::File::File(const std::string_view &path, const Mode mode) noexcept
 
 std::string_view IO::File::filename(void) const noexcept
 {
+    if (_path.empty())
+        return std::string_view();
     auto index = _path.size();
     auto lastPointIndex = index;
     while (--index && (_path[index] != '/') && (_path[index] != '\\'))
