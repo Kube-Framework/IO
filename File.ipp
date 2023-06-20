@@ -12,6 +12,7 @@ inline bool kF::IO::File::readAll(Container &container) noexcept
 {
     using Range = decltype(std::declval<Container>().size());
 
+    ensureStream();
     const auto expectedSize = fileSize();
     container.resize(static_cast<Range>(expectedSize));
     const auto readSize = read(
@@ -28,4 +29,11 @@ inline Container kF::IO::File::readAll(void) noexcept
     if (!readAll(container)) [[unlikely]]
         container.clear();
     return container;
+}
+
+template<kF::IO::Internal::WritableContainer Container>
+inline bool kF::IO::File::writeAll(const Container &container) noexcept
+{
+    const auto from = reinterpret_cast<const std::uint8_t *>(&*std::begin(container));
+    return write(from, from + container.size());
 }

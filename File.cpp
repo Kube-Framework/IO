@@ -3,33 +3,18 @@
  * @ Description: IO File
  */
 
-#include <fstream>
-#include <filesystem>
+#include "File.hpp"
+#include "ResourceManager.hpp"
 
 #include <Kube/Core/Abort.hpp>
 #include <Kube/Core/Assert.hpp>
 
-#include "File.hpp"
-#include "ResourceManager.hpp"
+#include <filesystem>
 
 using namespace kF;
 
-struct IO::File::StreamHandle
-{
-    std::ifstream ifs;
-    std::size_t fileSize {};
-};
-
-IO::File::~File(void) noexcept
-{
-    if (_stream) [[unlikely]] {
-        _stream->~StreamHandle();
-        IOAllocator::Deallocate(_stream, sizeof(StreamHandle), alignof(StreamHandle));
-    }
-}
-
-IO::File::File(const std::string_view &path) noexcept
-    : _path(path)
+IO::File::File(const std::string_view &path, const Mode mode) noexcept
+    : _path(path), _mode(mode)
 {
     if (path.starts_with(ResourcePrefix)) {
         const auto to = static_cast<std::uint32_t>(path.find('/', EnvironmentBeginIndex));
@@ -69,29 +54,32 @@ bool IO::File::exists(void) const noexcept
     if (isResource())
         return resourceExists();
     else
-        return std::filesystem::exists(_path.toView());
+        return std::filesystem::exists(std::filesystem::path(_path.toView()));
 }
 
 std::size_t IO::File::fileSize(void) const noexcept
 {
-    if (isResource()) {
+    if (isResource())
         return queryResource().size();
-    } else {
+    else if (_stream.is_open())
+        return _fileSize;
+    else
         return std::filesystem::file_size(_path.toView());
-    }
 }
 
-void IO::File::setReadOffset(const std::size_t offset) noexcept
+void IO::File::setOffset(const std::size_t offset) noexcept
 {
     if (_offset != offset) {
         _offset = offset;
         if (!isResource())
-            _stream->ifs.seekg(static_cast<std::streamoff>(offset));
+            _stream.seekg(static_cast<std::streamoff>(offset));
     }
 }
 
 std::size_t IO::File::read(std::uint8_t * const from, std::uint8_t * const to, const std::size_t offset) noexcept
 {
+    kFEnsure(Core::HasFlags(_mode, Mode::Read), "IO::File::write: File not opened for reading");
+
     constexpr auto GetReadSize = [](const std::size_t offset, const std::size_t desired, const std::size_t size) {
         if (offset < size) [[likely]]
             return std::min(size - offset, desired);
@@ -112,11 +100,11 @@ std::size_t IO::File::read(std::uint8_t * const from, std::uint8_t * const to, c
         return readCount;
     } else {
         ensureStream();
-        auto readCount = GetReadSize(offset, count, _stream->fileSize);
+        auto readCount = GetReadSize(offset, count, _fileSize);
         if (readCount) [[likely]] {
-            setReadOffset(offset);
-            if (_stream->ifs.good()) {
-                _stream->ifs.read(reinterpret_cast<char *>(from), static_cast<std::streamoff>(readCount));
+            setOffset(offset);
+            if (_stream.good()) {
+                _stream.read(reinterpret_cast<char *>(from), static_cast<std::streamoff>(readCount));
                 _offset += readCount;
             } else
                 return 0u;
@@ -125,22 +113,27 @@ std::size_t IO::File::read(std::uint8_t * const from, std::uint8_t * const to, c
     }
 }
 
+bool IO::File::write(const std::uint8_t * const from, const std::uint8_t * const to, const std::size_t offset) noexcept
+{
+    kFEnsure(!isResource(), "IO::File::write: Cannot write into resource file");
+    kFEnsure(Core::HasFlags(_mode, Mode::Write), "IO::File::write: File not opened for writing");
+    ensureStream();
+    setOffset(offset);
+    const auto writeCount = std::distance(from, to);
+    _stream.write(reinterpret_cast<const char *>(from), writeCount);
+    _offset += writeCount;
+    return _stream.good();
+}
+
 bool kF::IO::File::copy(const std::string_view &destination) const noexcept
 {
     if (!exists())
         return false;
-    const std::filesystem::path dest(destination);
-    if (isResource()) {
-        File copy(*this);
-        const auto range = queryResource();
-        std::ofstream ofs(dest, std::ios::binary | std::ios::out);
-        if (ofs.fail())
-            return false;
-        ofs.write(reinterpret_cast<const char *>(range.from), static_cast<std::streamoff>(range.size()));
-        return ofs.good();
-    } else {
-        return std::filesystem::copy_file(_path.toView(), dest);
-    }
+    else if (isResource()) {
+        File copy(destination, Mode::WriteBinary);
+        return copy.writeAll(queryResource());
+    } else
+        return std::filesystem::copy_file(std::filesystem::path(_path.toView()), std::filesystem::path(destination));
 }
 
 bool kF::IO::File::remove(void) const noexcept
@@ -148,18 +141,18 @@ bool kF::IO::File::remove(void) const noexcept
     if (isResource() || !exists())
         return false;
     else
-        return std::filesystem::remove(_path.toView());
+        return std::filesystem::remove(std::filesystem::path(_path.toView()));
 }
 
 void kF::IO::File::ensureStream(void) noexcept
 {
-    if (!_stream) [[unlikely]] {
-        const auto alloc = IOAllocator::Allocate(sizeof(StreamHandle), alignof(StreamHandle));
-        _stream = new (alloc) StreamHandle {
-            .ifs = std::ifstream { std::filesystem::path(_path.toView()), std::ios::binary },
-            .fileSize = std::filesystem::file_size(_path.toView())
-        };
-        kFEnsure(_stream->ifs.good(),
-            "UI::File::ensureStream: Stream opened with invalid file path '", _path, '\'');
+    if (!_stream.is_open()) {
+        auto mode
+            = (Core::HasFlags(_mode, Mode::Write) ? std::ios::out : std::ios::openmode())
+            | (Core::HasFlags(_mode, Mode::Read) ? std::ios::in : std::ios::openmode())
+            | (IsBinary(_mode) ? std::ios::binary : std::ios::openmode());
+        _stream.open(std::filesystem::path(_path.toView()), mode);
+        kFEnsure(_stream.good(), "UI::File::ensureStream: Stream opened with invalid file path '", _path, '\'');
+        _fileSize = std::filesystem::file_size(_path.toView());
     }
 }

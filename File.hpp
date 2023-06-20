@@ -10,6 +10,8 @@
 
 #include "Base.hpp"
 
+#include <fstream>
+
 namespace kF::IO
 {
     class File;
@@ -18,11 +20,19 @@ namespace kF::IO
     {
         template<typename Container>
         concept ResizableContainer =
-            (sizeof(std::remove_cvref_t<decltype(*std::declval<Container>().data())>) == sizeof(std::byte))
+            (sizeof(std::remove_cvref_t<decltype(*std::begin(std::declval<Container>()))>) == sizeof(std::byte))
             && requires(Container &container) {
                 container.data();
                 container.size();
                 container.resize(std::declval<std::size_t>());
+            };
+
+        template<typename Container>
+        concept WritableContainer =
+            (sizeof(std::remove_cvref_t<decltype(*std::begin(std::declval<Container>()))>) == sizeof(std::byte))
+            && requires(Container &container) {
+                std::begin(container);
+                std::end(container);
             };
     }
 }
@@ -30,26 +40,39 @@ namespace kF::IO
 class kF::IO::File
 {
 public:
-    struct StreamHandle;
+    /** @brief Open modes */
+    enum class Mode
+    {
+        Read                = 0b0000001,
+        Write               = 0b0000010,
+        ReadAndWrite        = 0b0000011,
+        ReadBinary          = 0b0000101,
+        WriteBinary         = 0b0000110,
+        ReadAndWriteBinary  = 0b0000111
+    };
+
+    /** @brief Check if a mode is binary */
+    [[nodiscard]] static constexpr bool IsBinary(const Mode mode) noexcept
+        { return Core::ToUnderlying(mode) & Core::ToUnderlying(Core::RemoveFlags(Mode::ReadAndWriteBinary, Mode::Read, Mode::Write)); }
 
 
     /** @brief Destructor */
-    ~File(void) noexcept;
+    ~File(void) noexcept = default;
 
     /** @brief Default constructor */
     File(void) noexcept = default;
 
-    /** @brief Copy constructor */
-    File(const File &path) noexcept = default;
+    /** @brief Deleted copy constructor */
+    File(const File &path) noexcept = delete;
 
     /** @brief Move constructor */
     File(File &&path) noexcept = default;
 
     /** @brief Set file of given 'path' */
-    File(const std::string_view &path) noexcept;
+    File(const std::string_view &path, const Mode mode = Mode::Read) noexcept;
 
-    /** @brief Copy assignment */
-    File &operator=(const File &path) noexcept = default;
+    /** @brief Deleted copy assignment */
+    File &operator=(const File &path) noexcept = delete;
 
     /** @brief Move assignment */
     File &operator=(File &&path) noexcept = default;
@@ -94,8 +117,8 @@ public:
     /** @brief Get current offset */
     [[nodiscard]] std::size_t offset(void) const noexcept { return _offset; }
 
-    /** @brief Set read offset */
-    void setReadOffset(const std::size_t offset) noexcept;
+    /** @brief Set or write offset */
+    void setOffset(const std::size_t offset) noexcept;
 
 
     /** @brief Read data and store it into range (use internal offset) */
@@ -115,6 +138,21 @@ public:
     [[nodiscard]] Container readAll(void) noexcept;
 
 
+    /** @brief Write data range to file (use internal offset)
+     *  @note Resource files are read-only */
+    [[nodiscard]] inline bool write(const std::uint8_t * const from, const std::uint8_t * const to) noexcept
+        { return write(from, to, _offset); }
+
+    /** @brief Write data range to file
+     *  @param offset Offset in byte from where to start reading the file
+     *  @note Resource files are read-only */
+    [[nodiscard]] bool write(const std::uint8_t * const from, const std::uint8_t * const to, const std::size_t offset) noexcept;
+
+    /** @brief Read all file data and store it into custom container */
+    template<kF::IO::Internal::WritableContainer Container>
+    [[nodiscard]] bool writeAll(const Container &container) noexcept;
+
+
     /** @brief Copy file to another location */
     bool copy(const std::string_view &destination) const noexcept;
 
@@ -126,12 +164,13 @@ private:
     /** @brief Ensure that this instance has an allocated stream */
     void ensureStream(void) noexcept;
 
-
     Core::SmallString<IOAllocator> _path {};
     Core::HashedName _environmentHash {};
     std::uint32_t _environmentTo {};
-    StreamHandle *_stream {};
+    Mode _mode {};
     std::size_t _offset {};
+    std::size_t _fileSize {};
+    std::fstream _stream {};
 };
 
 #include "File.ipp"
