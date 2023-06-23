@@ -138,6 +138,17 @@ bool kF::IO::File::copy(const std::string_view &destination) const noexcept
         return std::filesystem::copy_file(std::filesystem::path(_path.toView()), std::filesystem::path(destination));
 }
 
+bool kF::IO::File::move(const std::string_view &destination) const noexcept
+{
+    if (isResource() || !exists()) {
+        return false;
+    } else {
+        std::error_code code {};
+        std::filesystem::rename(std::filesystem::path(_path.toView()), std::filesystem::path(destination), code);
+        return !code;
+    }
+}
+
 bool kF::IO::File::remove(void) const noexcept
 {
     if (isResource() || !exists())

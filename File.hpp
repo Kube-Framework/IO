@@ -156,7 +156,10 @@ public:
     /** @brief Copy file to another location */
     bool copy(const std::string_view &destination) const noexcept;
 
-    /** @brief remove file */
+    /** @brief Move file */
+    bool move(const std::string_view &destination) const noexcept;
+
+    /** @brief Remove file */
     bool remove(void) const noexcept;
 
 
