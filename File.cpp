@@ -123,7 +123,7 @@ bool IO::File::write(const std::uint8_t * const from, const std::uint8_t * const
     setOffset(offset);
     const auto writeCount = std::distance(from, to);
     _stream.write(reinterpret_cast<const char *>(from), writeCount);
-    _offset += writeCount;
+    _offset += std::size_t(writeCount);
     return _stream.good();
 }
 
