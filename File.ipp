@@ -12,7 +12,8 @@ inline bool kF::IO::File::readAll(Container &container) noexcept
 {
     using Range = decltype(std::declval<Container>().size());
 
-    ensureStream();
+    if (!isResource())
+        ensureStream();
     const auto expectedSize = fileSize();
     container.resize(static_cast<Range>(expectedSize));
     const auto readSize = read(
