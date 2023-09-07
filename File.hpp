@@ -81,8 +81,14 @@ public:
     /** @brief Get file path */
     [[nodiscard]] std::string_view path(void) const noexcept { return _path; }
 
+    /** @brief Get file name with its extension */
+    [[nodiscard]] std::string_view filenameWithExtension(void) const noexcept;
+
     /** @brief Get file name */
     [[nodiscard]] std::string_view filename(void) const noexcept;
+
+    /** @brief Get directory path */
+    [[nodiscard]] std::string_view directoryPath(void) const noexcept;
 
 
     /** @brief Check if the file is a resource file (embedded into the executable) */
@@ -156,7 +162,8 @@ public:
     /** @brief Copy file to another location */
     bool copy(const std::string_view &destination) const noexcept;
 
-    /** @brief Move file */
+    /** @brief Move file
+     *  @warning This function do not changes the file instance path */
     bool move(const std::string_view &destination) const noexcept;
 
     /** @brief Remove file */

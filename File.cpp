@@ -23,16 +23,31 @@ IO::File::File(const std::string_view &path, const Mode mode) noexcept
     }
 }
 
-std::string_view IO::File::filename(void) const noexcept
+std::string_view IO::File::filenameWithExtension(void) const noexcept
 {
     if (_path.empty())
         return std::string_view();
     auto index = _path.size();
-    auto lastPointIndex = index;
-    while (--index && (_path[index] != '/') && (_path[index] != '\\'))
-        lastPointIndex = Core::BranchlessIf(_path[index] == '.', index, lastPointIndex);
+    while (--index && (_path[index] != '/' & _path[index] != '\\'));
     index = bool(index) * (index + 1); // Only increment by 1 if not zero
-    return _path.toView().substr(index, lastPointIndex - index);
+    return _path.toView().substr(index);
+}
+
+std::string_view IO::File::filename(void) const noexcept
+{
+    const auto file = filenameWithExtension();
+    auto index = file.size();
+    while (--index && file[index] != '.');
+    return file.substr(0, file.size() - index);
+}
+
+std::string_view IO::File::directoryPath(void) const noexcept
+{
+    if (_path.empty())
+        return std::string_view();
+    auto index = _path.size();
+    while (--index && (_path[index] != '/' & _path[index] != '\\'));
+    return _path.toView().substr(0, index);
 }
 
 bool IO::File::resourceExists(void) const noexcept
