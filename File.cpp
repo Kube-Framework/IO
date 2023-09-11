@@ -28,7 +28,7 @@ std::string_view IO::File::filenameWithExtension(void) const noexcept
     if (_path.empty())
         return std::string_view();
     auto index = _path.size();
-    while (--index && (_path[index] != '/' & _path[index] != '\\'));
+    while (--index && ((_path[index] != '/') & (_path[index] != '\\')));
     index = bool(index) * (index + 1); // Only increment by 1 if not zero
     return _path.toView().substr(index);
 }
@@ -46,7 +46,7 @@ std::string_view IO::File::directoryPath(void) const noexcept
     if (_path.empty())
         return std::string_view();
     auto index = _path.size();
-    while (--index && (_path[index] != '/' & _path[index] != '\\'));
+    while (--index && ((_path[index] != '/') & (_path[index] != '\\')));
     return _path.toView().substr(0, index);
 }
 
