@@ -79,16 +79,24 @@ public:
 
 
     /** @brief Get file path */
-    [[nodiscard]] std::string_view path(void) const noexcept { return _path; }
+    template<typename StringType = std::string_view>
+        requires std::constructible_from<StringType, std::string_view>
+    [[nodiscard]] StringType path(void) const noexcept { return _path; }
 
     /** @brief Get file name with its extension */
-    [[nodiscard]] std::string_view filenameWithExtension(void) const noexcept;
+    template<typename StringType = std::string_view>
+        requires std::constructible_from<StringType, std::string_view>
+    [[nodiscard]] StringType filenameWithExtension(void) const noexcept;
 
     /** @brief Get file name */
-    [[nodiscard]] std::string_view filename(void) const noexcept;
+    template<typename StringType = std::string_view>
+        requires std::constructible_from<StringType, std::string_view>
+    [[nodiscard]] StringType filename(void) const noexcept;
 
     /** @brief Get directory path */
-    [[nodiscard]] std::string_view directoryPath(void) const noexcept;
+    template<typename StringType = std::string_view>
+        requires std::constructible_from<StringType, std::string_view>
+    [[nodiscard]] StringType directoryPath(void) const noexcept;
 
 
     /** @brief Check if the file is a resource file (embedded into the executable) */
