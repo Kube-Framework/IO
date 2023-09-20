@@ -29,7 +29,8 @@ Type kF::IO::GetExecutablePath(void) noexcept
     const auto expectedSize = wai_getExecutablePath(nullptr, 0, nullptr);
     if (expectedSize == -1) [[unlikely]]
         return Type {};
-    Type container(static_cast<Range>(expectedSize));
+    Type container;
+    container.resize(static_cast<Range>(expectedSize));
 
     // Query path
     const auto finalSize = wai_getExecutablePath(container.data(), static_cast<int>(container.size()), nullptr);
