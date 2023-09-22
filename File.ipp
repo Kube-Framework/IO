@@ -26,9 +26,9 @@ inline StringType kF::IO::File::filename(void) const noexcept
     const auto file = filenameWithExtension();
     auto index = file.size();
     while (--index) {
-        if (file[index] != '.')
+        if (file[index] == '.')
             return file.substr(0, index);
-        else if ((file[index] == '/') & (file[index] == '\\'))
+        else if ((file[index] == '/') | (file[index] == '\\'))
             break;
     }
     return file;
