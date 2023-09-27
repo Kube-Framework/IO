@@ -43,6 +43,7 @@ public:
     /** @brief Open modes */
     enum class Mode
     {
+        None                = 0b0000000,
         Read                = 0b0000001,
         Write               = 0b0000010,
         ReadAndWrite        = 0b0000011,
@@ -69,7 +70,7 @@ public:
     File(File &&path) noexcept = default;
 
     /** @brief Set file of given 'path' */
-    File(const std::string_view &path, const Mode mode = Mode::Read) noexcept;
+    File(const std::string_view &path, const Mode mode = Mode::None) noexcept;
 
     /** @brief Deleted copy assignment */
     File &operator=(const File &path) noexcept = delete;
